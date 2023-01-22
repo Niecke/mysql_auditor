@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  mysql_auditor:
+    image: mysql_auditor:latest
+    ports:
+      - 5000:5000
+    volumes:
+      - $PWD/src:/home/app
+
+  percona8:
+    image: percona:8
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true
+
+  percona57:
+    image: percona:ps-5.7
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true

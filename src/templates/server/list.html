@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Servers</h1>
+    {% if servers %}
+    <ul>
+        {% for server in servers %}
+        <li>
+            {{ server.id }} - {{ server.username }}:{{ server.password }}@{{ server.host }}:{{ server.port }}
+            <a href="{{ url_for('server.test', server_id=server.id) }}">Check Config</a>
+            <a href="{{ url_for('server.edit', server_id=server.id) }}">Edit Server</a>
+            <a href="{{ url_for('server.delete', server_id=server.id) }}">Delete Server</a>
+            {% if server.id == checked_server_id %}
+            Status: {{ check_result }}
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('server.create') }}">Add Server</a>
+    {% endif %}
+{% endblock %}

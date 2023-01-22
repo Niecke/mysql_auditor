@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+{{error}}
+<h1>Server - {{ server.id }}</h1>
+<form method='post' action="{{ url_for('server.edit', server_id=server.id) }}">
+    <label for="host">Host:</label><br>
+    <input type="text" id="host" name="host" value="{{ server.host }}"><br>
+
+    <label for="port">Port:</label><br>
+    <input type="text" id="port" name="port" value="{{ server.port }}"><br>
+
+    <label for="username">Username:</label><br>
+    <input type="text" id="username" name="username" value="{{ server.username }}"><br>
+
+    <label for="password">Password:</label><br>
+    <input type="password" id="password" name="password"><br>
+    <p>Password will be reset if left empty.</p>
+
+    <button type="submit">Submit</button>
+</form>
+{% endblock %}
