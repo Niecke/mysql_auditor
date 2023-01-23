@@ -23,7 +23,7 @@ def pull_config():
             cursorclass=pymysql.cursors.DictCursor,
         )
 
-        with connection.cursor() as cursor, db.session.no_autoflush:
+        with connection.cursor() as cursor:
             stmt = "SELECT * FROM mysql.user"
             cursor.execute(stmt)
             result = cursor.fetchall()
@@ -35,21 +35,12 @@ def pull_config():
                     .filter(User.Host == r["Host"])
                     .filter(User.server_id == server.id)
                     .first()
-                )
+                ) or User(server_id=server.id)
 
-                # update the existing user
-                if user:
-                    user.pull_counter = new_pull_counter
-                    for k in r:
-                        setattr(user, k, r[k])
-                # create a new user
-                else:
-                    user = User()
-                    user.server_id = server.id
-                    user.pull_counter = new_pull_counter
-                    for k in r:
-                        setattr(user, k, r[k])
-                    db.session.add(user)
+                user.pull_counter = new_pull_counter
+                for k in r:
+                    setattr(user, k, r[k])
+                db.session.add(user)
 
             # at the end we check for users that have not been updated
             old_users = (
@@ -59,6 +50,8 @@ def pull_config():
             )
             for o in old_users:
                 db.session.delete(o)
+
+            db.session.commit()
 
             update_database_privileges(
                 connection=connection,
@@ -83,27 +76,19 @@ def update_database_privileges(connection, server_id, user, new_pull_counter):
         result = cursor.fetchall()
 
         for r in result:
-            current_app.logger.info(f"adding priv: {r}")
+            current_app.logger.debug(f"adding priv: {r}")
             db_priv = (
                 DatabasePrivileges.query.filter(DatabasePrivileges.User == user.User)
                 .filter(DatabasePrivileges.Host == user.Host)
                 .filter(DatabasePrivileges.Db == r["Db"])
                 .filter(DatabasePrivileges.server_id == server_id)
-            ).first()
+                .first()
+            ) or DatabasePrivileges(server_id=server_id)
 
-            if db_priv:
-                current_app.logger.info(f"updating a priv [{db_priv}]")
-                db_priv.pull_counter = new_pull_counter
-                for k in r:
-                    setattr(db_priv, k, r[k])
-            else:
-                current_app.logger.info("creating a new priv")
-                db_priv = DatabasePrivileges()
-                db_priv.server_id = server_id
-                db_priv.pull_counter = new_pull_counter
-                for k in r:
-                    setattr(db_priv, k, r[k])
-                db.session.add(db_priv)
+            db_priv.pull_counter = new_pull_counter
+            for k in r:
+                setattr(db_priv, k, r[k])
+            db.session.add(db_priv)
 
             # at the end we check for users that have not been updated
             old_db_privs = (
@@ -116,6 +101,8 @@ def update_database_privileges(connection, server_id, user, new_pull_counter):
 
             for o in old_db_privs:
                 db.session.delete(o)
+
+            db.session.commit()
 
 
 @config.route("/users")
@@ -133,10 +120,10 @@ def user(user_id):
 @config.route("/db_privs")
 def db_priv_list():
     db_privs = DatabasePrivileges.query.order_by(DatabasePrivileges.id).all()
-    current_app.logger.info(db_privs)
+    current_app.logger.debug(db_privs)
     rendered_db_privs = list()
     for db_priv in db_privs:
-        current_app.logger.info(f"processing {db_priv}")
+        current_app.logger.debug(f"processing {db_priv}")
         l = map_grants(db_priv)
         s = f"GRANT {','.join(l)} ON {db_priv.Db}.* TO '{db_priv.User}'@'{db_priv.Host}'"
         rendered_db_privs.append({"s": s} | db_priv.__dict__)
