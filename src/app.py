@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import Flask
-from model import db
+from db import db
 
 from views.default import default
 from views.server import server

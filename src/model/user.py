@@ -1,19 +1,7 @@
 # -*- coding: utf-8 -*-
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.types import CHAR
 
-db = SQLAlchemy()
-
-
-class Server(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    host = db.Column(db.String, nullable=False)
-    port = db.Column(db.Integer, default=3306)
-    username = db.Column(db.String, nullable=False)
-    password = db.Column(db.String, nullable=False)
-    pull_counter = db.Column(db.BigInteger, default=0)
-    users = db.relationship("User", backref="server")
-    database_privileges = db.relationship("DatabasePrivileges", backref="server")
+from db import db
 
 
 class User(db.Model):
@@ -78,33 +66,3 @@ class User(db.Model):
     max_updates = db.Column(db.Integer)
     max_connections = db.Column(db.Integer)
     max_user_connections = db.Column(db.Integer)
-
-
-class DatabasePrivileges(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    pull_counter = db.Column(db.BigInteger, default=0)
-    server_id = db.Column(db.Integer, db.ForeignKey("server.id"), nullable=False)
-
-    User = db.Column(db.String)
-    Db = db.Column(db.String)
-    Host = db.Column(db.String)
-
-    Select_priv = db.Column(CHAR(1))
-    Insert_priv = db.Column(CHAR(1))
-    Update_priv = db.Column(CHAR(1))
-    Delete_priv = db.Column(CHAR(1))
-    Create_priv = db.Column(CHAR(1))
-    Drop_priv = db.Column(CHAR(1))
-    Grant_priv = db.Column(CHAR(1))
-    References_priv = db.Column(CHAR(1))
-    Index_priv = db.Column(CHAR(1))
-    Alter_priv = db.Column(CHAR(1))
-    Create_tmp_table_priv = db.Column(CHAR(1))
-    Lock_tables_priv = db.Column(CHAR(1))
-    Create_view_priv = db.Column(CHAR(1))
-    Show_view_priv = db.Column(CHAR(1))
-    Create_routine_priv = db.Column(CHAR(1))
-    Alter_routine_priv = db.Column(CHAR(1))
-    Execute_priv = db.Column(CHAR(1))
-    Event_priv = db.Column(CHAR(1))
-    Trigger_priv = db.Column(CHAR(1))

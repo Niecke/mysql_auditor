@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint, render_template, current_app
 import pymysql.cursors
-from model import db, Server, User, DatabasePrivileges
+
+from db import db
+from model import Server, User, DatabasePrivileges
 
 
 config = Blueprint("config", __name__, url_prefix="/config")

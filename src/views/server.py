@@ -5,7 +5,8 @@ import pymysql.cursors
 import sqlalchemy
 from flask import Blueprint, current_app, redirect, render_template, request, url_for
 
-from model import Server, db
+from db import db
+from model import Server
 
 server = Blueprint("server", __name__, url_prefix="/server")
 
