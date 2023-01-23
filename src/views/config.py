@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, current_app
 import pymysql.cursors
 
 from db import db
-from model import Server, User, DatabasePrivileges
+from model import Server, User, DatabasePrivileges, TablePrivileges
 
 
 config = Blueprint("config", __name__, url_prefix="/config")
@@ -42,6 +42,22 @@ def pull_config():
                     setattr(user, k, r[k])
                 db.session.add(user)
 
+                db.session.commit()
+
+                update_database_privileges(
+                    connection=connection,
+                    server_id=server.id,
+                    user=user,
+                    new_pull_counter=new_pull_counter,
+                )
+
+                update_table_privileges(
+                    connection=connection,
+                    server_id=server.id,
+                    user=user,
+                    new_pull_counter=new_pull_counter,
+                )
+
             # at the end we check for users that have not been updated
             old_users = (
                 User.query.filter(User.server_id == server.id)
@@ -51,16 +67,28 @@ def pull_config():
             for o in old_users:
                 db.session.delete(o)
 
-            db.session.commit()
-
-            update_database_privileges(
-                connection=connection,
-                server_id=server.id,
-                user=user,
-                new_pull_counter=new_pull_counter,
+            old_table_privs = (
+                TablePrivileges.query.filter(TablePrivileges.server_id == server.id)
+                .filter(TablePrivileges.pull_counter == server.pull_counter)
+                .all()
             )
 
-            # update_table_privileges()
+            for o in old_table_privs:
+                db.session.delete(o)
+
+            # at the end we check for users that have not been updated
+            old_db_privs = (
+                DatabasePrivileges.query.filter(
+                    DatabasePrivileges.server_id == server.id
+                )
+                .filter(DatabasePrivileges.pull_counter == server.pull_counter)
+                .all()
+            )
+
+            for o in old_db_privs:
+                db.session.delete(o)
+
+            db.session.commit()
 
             server.pull_counter = new_pull_counter
             db.session.commit()
@@ -90,17 +118,32 @@ def update_database_privileges(connection, server_id, user, new_pull_counter):
                 setattr(db_priv, k, r[k])
             db.session.add(db_priv)
 
-            # at the end we check for users that have not been updated
-            old_db_privs = (
-                DatabasePrivileges.query.filter(DatabasePrivileges.User == user.User)
-                .filter(DatabasePrivileges.Host == user.Host)
-                .filter(DatabasePrivileges.Db == r["Db"])
-                .filter(DatabasePrivileges.server_id == server_id)
-                .filter(DatabasePrivileges.pull_counter == new_pull_counter - 1)
-            )
+            db.session.commit()
 
-            for o in old_db_privs:
-                db.session.delete(o)
+
+def update_table_privileges(connection, server_id, user, new_pull_counter):
+    with connection.cursor() as cursor:
+        stmt = f"SELECT * FROM mysql.tables_priv WHERE Host = '{user.Host}' AND User = '{user.User}'"
+        current_app.logger.debug(stmt)
+        cursor.execute(stmt)
+        result = cursor.fetchall()
+        current_app.logger.debug(f"fetched table_privs: {result}")
+
+        for r in result:
+            table_priv = (
+                TablePrivileges.query.filter(TablePrivileges.User == user.User)
+                .filter(TablePrivileges.Host == user.Host)
+                .filter(TablePrivileges.Db == r["Db"])
+                .filter(TablePrivileges.Table_name == r["Table_name"])
+                .filter(TablePrivileges.server_id == server_id)
+                .first()
+            ) or TablePrivileges(server_id=server_id)
+
+            table_priv.pull_counter = new_pull_counter
+            for k in r:
+                setattr(table_priv, k, r[k])
+            current_app.logger.debug(f"adding table priv - {r['Table_name']}")
+            db.session.add(table_priv)
 
             db.session.commit()
 
@@ -124,13 +167,13 @@ def db_priv_list():
     rendered_db_privs = list()
     for db_priv in db_privs:
         current_app.logger.debug(f"processing {db_priv}")
-        l = map_grants(db_priv)
+        l = map_db_grants(db_priv)
         s = f"GRANT {','.join(l)} ON {db_priv.Db}.* TO '{db_priv.User}'@'{db_priv.Host}'"
         rendered_db_privs.append({"s": s} | db_priv.__dict__)
     return render_template("default/db_privs.html", db_privs=rendered_db_privs)
 
 
-def map_grants(priv):
+def map_db_grants(priv):
     l = list()
     if priv.Select_priv == "Y":
         l.append("SELECT")
@@ -171,3 +214,15 @@ def map_grants(priv):
     if priv.Trigger_priv == "Y":
         l.append("TRIGGER")
     return l
+
+
+@config.route("/table_privs")
+def table_priv_list():
+    table_privs = TablePrivileges.query.order_by(TablePrivileges.id).all()
+    rendered_table_privs = list()
+
+    for table_priv in table_privs:
+        privs_str = str(table_priv.Table_priv).upper()
+        s = f"GRANT {privs_str} ON {table_priv.Db}.{table_priv.Table_name} TO '{table_priv.User}'@'{table_priv.Host}'"
+        rendered_table_privs.append({"s": s} | table_priv.__dict__)
+    return render_template("default/table_privs.html", table_privs=rendered_table_privs)

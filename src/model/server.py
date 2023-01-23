@@ -11,3 +11,4 @@ class Server(db.Model):
     pull_counter = db.Column(db.BigInteger, default=0)
     users = db.relationship("User", backref="server")
     database_privileges = db.relationship("DatabasePrivileges", backref="server")
+    table_privileges = db.relationship("TablePrivileges", backref="server")
