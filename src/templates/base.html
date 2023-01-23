@@ -13,6 +13,10 @@
         <a href="{{ url_for('default.index') }}">Index</a>
         <a href="{{ url_for('server.list') }}">Server List</a>
         <a href="{{ url_for('server.create') }}">Add Server</a>
+        <a href="{{ url_for('config.user_list') }}">User List</a>
+        <a href="{{ url_for('config.pull_config') }}">Pull Config</a>
+        <a href="{{ url_for('config.db_priv_list') }}">DB Privileges</a>
+        <br />
         {% block content %}
         {% endblock %}
     </div>

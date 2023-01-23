@@ -57,6 +57,7 @@ def edit(server_id):
 @server.route("/delete/<int:server_id>", methods=["GET"])
 def delete(server_id):
 
+    # TODO delete the user and other config for the server
     server = Server.query.get_or_404(server_id)
     db.session.delete(server)
     db.session.commit()

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+{% for user in users %}
+<li>
+    S-{{ user.server_id }} / {{ user.id }} - {{ user.User }}@{{ user.Host }} - PullCounter: {{ user.pull_counter }} 
+    <a href="{{ url_for('config.user', user_id=user.id) }}">Details</a>
+</li>
+{% endfor %}
+{% endblock %}

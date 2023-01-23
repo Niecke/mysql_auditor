@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+{% for db_priv in db_privs %}
+<li>
+    S-{{ db_priv.server_id }} / {{ db_priv.id }} - {{db_priv.s}} - PullCounter: {{ db_priv.pull_counter }}
+</li>
+{% endfor %}
+{% endblock %}

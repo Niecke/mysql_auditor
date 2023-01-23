@@ -4,6 +4,7 @@ from model import db
 
 from views.default import default
 from views.server import server
+from views.config import config
 
 
 def create_app():
@@ -20,5 +21,6 @@ def create_app():
 
     app.register_blueprint(default)
     app.register_blueprint(server)
+    app.register_blueprint(config)
 
     return app
