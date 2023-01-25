@@ -6,7 +6,7 @@ import sqlalchemy
 from flask import Blueprint, current_app, redirect, render_template, request, url_for
 
 from db import db
-from model import Server
+from model import Server, User, DatabasePrivileges, TablePrivileges
 
 server = Blueprint("server", __name__, url_prefix="/server")
 
@@ -58,10 +58,20 @@ def edit(server_id):
 @server.route("/delete/<int:server_id>", methods=["GET"])
 def delete(server_id):
 
-    # TODO delete the user and other config for the server
-    server = Server.query.get_or_404(server_id)
-    db.session.delete(server)
-    db.session.commit()
+    with db.session.no_autoflush:
+        server = Server.query.get_or_404(server_id)
+        db.session.delete(server)
+        users = User.query.filter(User.server_id == server_id).delete()
+        db_privs = DatabasePrivileges.query.filter(
+            DatabasePrivileges.server_id == server_id
+        ).delete()
+        table_privs = TablePrivileges.query.filter(
+            TablePrivileges.server_id == server_id
+        ).delete()
+        current_app.logger.debug(
+            f"Deleted server {server_id} with {users} user, {db_privs} database privileges and {table_privs} table privileges."
+        )
+        db.session.commit()
 
     return redirect(url_for("server.list"))
 
