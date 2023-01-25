@@ -1,6 +1,24 @@
 {% extends "base.html" %}
 {% block content %}
-    <h1>MySQL Auditor</h1>
-    <a href="{{ url_for('server.list') }}">Server List</a>
-    <a href="{{ url_for('config.pull_config') }}">Pull Config</a>
+<ul>
+    <li>
+        Servers: {{ server_cnt }}
+    </li>
+    <li>
+        Users: {{ user_cnt }}
+    </li>
+    <li>
+        Database Privileges: {{ db_priv_cnt }}
+    </li>
+    <li>
+        Table Privileges: {{ table_priv_cnt }}
+    </li>
+</ul>
+
+{% if pull_result %}
+<h2>Pull Result</h2>
+Servers: {{ pull_result.servers }} <br />
+Failed: {{ pull_result.failed }}
+{% endif %}
+
 {% endblock %}

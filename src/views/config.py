@@ -13,88 +13,107 @@ config = Blueprint("config", __name__, url_prefix="/config")
 def pull_config():
     servers = Server.query.order_by(Server.id).all()
 
+    pull_result = {"servers": 0, "failed": 0}
+
     for server in servers:
-        connection = pymysql.connect(
-            host=server.host,
-            port=server.port,
-            user=server.username,
-            password=server.password,
-            connect_timeout=3,
-            cursorclass=pymysql.cursors.DictCursor,
-        )
+        pull_result["servers"] += 1
+        try:
+            connection = pymysql.connect(
+                host=server.host,
+                port=server.port,
+                user=server.username,
+                password=server.password,
+                connect_timeout=3,
+                cursorclass=pymysql.cursors.DictCursor,
+            )
 
-        with connection.cursor() as cursor:
-            stmt = "SELECT * FROM mysql.user"
-            cursor.execute(stmt)
-            result = cursor.fetchall()
-            new_pull_counter = server.pull_counter + 1
+            with connection.cursor() as cursor:
+                stmt = "SELECT * FROM mysql.user"
+                cursor.execute(stmt)
+                result = cursor.fetchall()
+                new_pull_counter = server.pull_counter + 1
 
-            for r in result:
-                user = (
-                    User.query.filter(User.User == r["User"])
-                    .filter(User.Host == r["Host"])
-                    .filter(User.server_id == server.id)
-                    .first()
-                ) or User(server_id=server.id)
+                for r in result:
+                    user = (
+                        User.query.filter(User.User == r["User"])
+                        .filter(User.Host == r["Host"])
+                        .filter(User.server_id == server.id)
+                        .first()
+                    ) or User(server_id=server.id)
 
-                user.pull_counter = new_pull_counter
-                for k in r:
-                    setattr(user, k, r[k])
-                db.session.add(user)
+                    user.pull_counter = new_pull_counter
+                    for k in r:
+                        setattr(user, k, r[k])
+                    db.session.add(user)
+
+                    db.session.commit()
+
+                    update_database_privileges(
+                        connection=connection,
+                        server_id=server.id,
+                        user=user,
+                        new_pull_counter=new_pull_counter,
+                    )
+
+                    update_table_privileges(
+                        connection=connection,
+                        server_id=server.id,
+                        user=user,
+                        new_pull_counter=new_pull_counter,
+                    )
+
+                # at the end we check for users that have not been updated
+                old_users = (
+                    User.query.filter(User.server_id == server.id)
+                    .filter(User.pull_counter == server.pull_counter)
+                    .all()
+                )
+                for o in old_users:
+                    db.session.delete(o)
+
+                old_table_privs = (
+                    TablePrivileges.query.filter(TablePrivileges.server_id == server.id)
+                    .filter(TablePrivileges.pull_counter == server.pull_counter)
+                    .all()
+                )
+
+                for o in old_table_privs:
+                    db.session.delete(o)
+
+                # at the end we check for users that have not been updated
+                old_db_privs = (
+                    DatabasePrivileges.query.filter(
+                        DatabasePrivileges.server_id == server.id
+                    )
+                    .filter(DatabasePrivileges.pull_counter == server.pull_counter)
+                    .all()
+                )
+
+                for o in old_db_privs:
+                    db.session.delete(o)
 
                 db.session.commit()
 
-                update_database_privileges(
-                    connection=connection,
-                    server_id=server.id,
-                    user=user,
-                    new_pull_counter=new_pull_counter,
-                )
+                server.pull_counter = new_pull_counter
+                db.session.commit()
+        except:
+            # in case one server can not be reached; just skip it
+            pull_result["failed"] += 1
+            continue
 
-                update_table_privileges(
-                    connection=connection,
-                    server_id=server.id,
-                    user=user,
-                    new_pull_counter=new_pull_counter,
-                )
+    server_cnt = Server.query.count()
+    user_cnt = User.query.count()
+    db_priv_cnt = DatabasePrivileges.query.count()
+    table_priv_cnt = TablePrivileges.query.count()
 
-            # at the end we check for users that have not been updated
-            old_users = (
-                User.query.filter(User.server_id == server.id)
-                .filter(User.pull_counter == server.pull_counter)
-                .all()
-            )
-            for o in old_users:
-                db.session.delete(o)
-
-            old_table_privs = (
-                TablePrivileges.query.filter(TablePrivileges.server_id == server.id)
-                .filter(TablePrivileges.pull_counter == server.pull_counter)
-                .all()
-            )
-
-            for o in old_table_privs:
-                db.session.delete(o)
-
-            # at the end we check for users that have not been updated
-            old_db_privs = (
-                DatabasePrivileges.query.filter(
-                    DatabasePrivileges.server_id == server.id
-                )
-                .filter(DatabasePrivileges.pull_counter == server.pull_counter)
-                .all()
-            )
-
-            for o in old_db_privs:
-                db.session.delete(o)
-
-            db.session.commit()
-
-            server.pull_counter = new_pull_counter
-            db.session.commit()
-
-    users = User.query.order_by(User.id).all()
-    return render_template("default/users.html", users=users)
+    return render_template(
+        "default/index.html",
+        pull_result=pull_result,
+        server_cnt=server_cnt,
+        user_cnt=user_cnt,
+        db_priv_cnt=db_priv_cnt,
+        table_priv_cnt=table_priv_cnt,
+    )
 
 
 def update_database_privileges(connection, server_id, user, new_pull_counter):

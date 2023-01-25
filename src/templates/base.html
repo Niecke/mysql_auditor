@@ -1,29 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset='utf-8'>
-    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    {% block head %}
-    <title>MySQL Auditor</title>
-    {% endblock %}
-    <meta name='viewport' content='width=device-width, initial-scale=1'>
-</head>
-<body>
-    <div id="content">
-        <a href="{{ url_for('default.index') }}">Index</a>
-        <a href="{{ url_for('server.list') }}">Server List</a>
-        <a href="{{ url_for('server.create') }}">Add Server</a>
-        <a href="{{ url_for('config.user_list') }}">User List</a>
-        <a href="{{ url_for('config.pull_config') }}">Pull Config</a>
-        <a href="{{ url_for('config.db_priv_list') }}">DB Privileges</a>
-        <a href="{{ url_for('config.table_priv_list') }}">Table Privileges</a>
-        <br />
-        {% block content %}
+    <head>
+        <meta charset='utf-8'>
+        <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+        {% block head %}
+        <title>MySQL Auditor</title>
         {% endblock %}
-    </div>
-    <div id="footer">
-        {% block footer %}
-        {% endblock %}
-    </div>
-</body>
+        <meta name='viewport' content='width=device-width, initial-scale=1'>
+        <link href="/static/style.css" rel="stylesheet">
+    </head>
+    <body>
+            <div class="header">
+                <div class="title">
+                    <a href="{{ url_for('default.index') }}">
+                        MySQL Auditor
+                    </a>
+                </div>
+                <div>
+                    <a class="btn" href="{{ url_for('server.create') }}">Add Server</a>
+                    <a class="btn" href="{{ url_for('server.list') }}">Server List</a>
+                    <a class="btn" href="{{ url_for('config.user_list') }}">User List</a>
+                    <a class="btn" href="{{ url_for('config.db_priv_list') }}">DB Privileges</a>
+                    <a class="btn" href="{{ url_for('config.table_priv_list') }}">Table Privileges</a>
+                    <a class="btn" href="{{ url_for('config.pull_config') }}">Pull Config</a>
+                </div>
+            </div>
+            <div id="content" class="content">
+                {% block content %}
+                {% endblock %}
+            </div>
+            <div id="footer">
+                {% block footer %}
+                {% endblock %}
+            </div>
+    </body>
 </html>
