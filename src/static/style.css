@@ -86,14 +86,19 @@ a {
 .lists {
     margin: 1rem;
     width: 100%;
+    border-collapse: collapse;
 }
 
 tr.headerRows>th {
     padding-bottom: 1rem;
+    padding-top: 1rem;
+    border-bottom: 2px solid #34495E;
 }
 
 tr.rows>td {
     padding-bottom: 0.5rem;
+    padding-top: 0.5rem;
+    border-bottom: 1px solid #34495E;
 }
 
 .centered {
@@ -167,4 +172,16 @@ input {
     flex-direction: row;
     padding-left: 1rem;
     padding-right: 1rem;
+}
+
+.diff {
+    padding-bottom: 1rem;
+}
+
+.diffTitle {
+    font-weight: 600;
+}
+
+.diffContent {
+    font-size: small;
 }

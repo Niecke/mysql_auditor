@@ -169,7 +169,7 @@ def update_table_privileges(connection, server_id, user, new_pull_counter):
 
 @config.route("/users")
 def user_list():
-    users = User.query.order_by(User.id).all()
+    users = User.query.order_by(User.server_id).all()
     return render_template("default/users.html", users=users)
 
 
