@@ -233,15 +233,3 @@ def map_db_grants(priv):
     if priv.Trigger_priv == "Y":
         l.append("TRIGGER")
     return l
-
-
-@config.route("/table_privs")
-def table_priv_list():
-    table_privs = TablePrivileges.query.order_by(TablePrivileges.id).all()
-    rendered_table_privs = list()
-
-    for table_priv in table_privs:
-        privs_str = str(table_priv.Table_priv).upper()
-        s = f"GRANT {privs_str} ON {table_priv.Db}.{table_priv.Table_name} TO '{table_priv.User}'@'{table_priv.Host}'"
-        rendered_table_privs.append({"s": s} | table_priv.__dict__)
-    return render_template("default/table_privs.html", table_privs=rendered_table_privs)

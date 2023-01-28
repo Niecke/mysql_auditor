@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block content %}
+<form method='post' action="{{ url_for('server.delete', server_id=server_id) }}">
+    Do you really want to delete the Server (ID={{ server_id }})
+    <button class="submit" type="submit">Confirm</button>
+</form>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container searchBox">
+    <form method=post action="{{ url_for('table_privs.list') }}">
+        <div class="container">
+        <div class="filterOption">
+            <div>
+                <label for="servers">Server</label>
+            </div>
+            <div>
+                <select name="servers" id="servers">
+                    <option value="" ></option>
+                    {% for server in servers %}
+                    <option value="{{ server.id }}" {% if server_id|int == server.id %}selected{% endif %}>{{ server.host }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="filterOption">
+            <div>
+                <label for="users">User</label>
+            </div>
+            <div>
+                <select name="users" id="users">
+                    <option value="" ></option>
+                    {% for user in users %}
+                    <option value="{{ user.User }}" {% if username == user.User %}selected{% endif %}>{{ user.User }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="filterOption">
+            <div>
+                <label for="databases">Database</label>
+            </div>
+            <div>
+                <select name="databases" id="databases">
+                    <option value="" ></option>
+                    {% for database in databases %}
+                    <option value="{{ database.Db }}" {% if database_name == database.Db %}selected{% endif %}>{{ database.Db }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <button class="btn">Filter</button>
+    </div>
+    </form>
+</div>
+<div class="container">
+<table class="lists">
+    <tr class="headerRows">
+        <th style="width:10%">
+            Server ID
+        </th>
+        <th style="width:10%">
+            Privilege ID
+        </th>
+        <th>
+            Privilege
+        </th>
+        <th style="width:15%">
+            Pull-Counter
+        </th>
+    </tr>
+{% for table_priv in table_privs %}
+    <tr class="rows">
+        <td>
+            {{ table_priv.server_id }}
+        </td>
+        <td>
+            {{ table_priv.id }}
+        </td>
+        <td style="text-align:right; font-size: small">
+            {{ table_priv.s }}
+        </td>
+        <td>
+            {{ table_priv.pull_counter }}
+        </td>
+    </tr>
+{% endfor %}
+</table>
+</div>
+{% endblock %}

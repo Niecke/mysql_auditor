@@ -1,9 +1,41 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="container">
+<table class="lists">
+    <tr class="headerRows">
+        <th style="width:10%">
+            Server ID
+        </th>
+        <th style="width:10%">
+            User ID
+        </th>
+        <th style="width:50%">
+            User
+        </th>
+        <th style="width:15%">
+            Pull-Counter
+        </th>
+        <th style="width:15%"></th>
+    </tr>
 {% for user in users %}
-<li>
-    S-{{ user.server_id }} / {{ user.id }} - {{ user.User }}@{{ user.Host }} - PullCounter: {{ user.pull_counter }} 
-    <a href="{{ url_for('config.user', user_id=user.id) }}">Details</a>
-</li>
+    <tr class="rows">
+        <td>
+            {{ user.server_id }}
+        </td>
+        <td>
+            {{ user.id }}
+        </td>
+        <td class="centered">
+            {{ user.User }}@{{ user.Host }}
+        </td>
+        <td>
+            {{ user.pull_counter }}
+        </td>
+        <td>
+            <a class="btn btn-small" href="{{ url_for('config.user', user_id=user.id) }}">Details</a>
+        </td>
+    </tr>
 {% endfor %}
+</table>
+</div>
 {% endblock %}

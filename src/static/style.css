@@ -7,6 +7,10 @@ ul {
   gap: 1rem;
 }
 
+input {
+    all: unset;
+}
+
 body {
     font-family: 'Helvetica', 'Arial', sans-serif;
     color: #444444;
@@ -50,7 +54,14 @@ a {
 
 .btn:hover {
     background-color: #D6DBDF;
-    color: #34495E;
+    color: #343a5e;
+}
+
+.btn-small {
+    font-size: medium;
+    padding: 0.2rem;
+    margin-left: 0.2rem;
+    margin-right: 0.2rem;
 }
 
 .icon {
@@ -72,9 +83,21 @@ a {
     display: block;
 }
 
-.servers {
+.lists {
     margin: 1rem;
     width: 100%;
+}
+
+tr.headerRows>th {
+    padding-bottom: 1rem;
+}
+
+tr.rows>td {
+    padding-bottom: 0.5rem;
+}
+
+.centered {
+    text-align: center;
 }
 
 .status {
@@ -106,4 +129,42 @@ th {
 
 td {
     text-align: center;
+}
+
+input {
+    background-color: #D6DBDF;
+    margin: 0.2rem;
+    padding: 0.2rem;
+    border-radius: 0.5rem;
+    text-indent: 0.2rem;
+}
+
+.submit {
+    cursor: pointer;
+    border-radius: 0.5rem;
+    background-color: #28326f;
+    border-color: #28326f;
+    font-size: large;
+    color: #D6DBDF;
+    padding: 0.3rem;
+}
+
+.submit:hover {
+    color: #28326f;
+    background-color: #D6DBDF;
+}
+
+.searchBox {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+.filter {
+    display: flex;
+}
+
+.filterOption {
+    flex-direction: row;
+    padding-left: 1rem;
+    padding-right: 1rem;
 }

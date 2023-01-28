@@ -1,8 +1,37 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="container">
+<table class="lists">
+    <tr class="headerRows">
+        <th style="width:10%">
+            Server ID
+        </th>
+        <th style="width:10%">
+            Privilege ID
+        </th>
+        <th>
+            Privilege
+        </th>
+        <th style="width:15%">
+            Pull-Counter
+        </th>
+    </tr>
 {% for db_priv in db_privs %}
-<li>
-    S-{{ db_priv.server_id }} / {{ db_priv.id }} - {{db_priv.s}} - PullCounter: {{ db_priv.pull_counter }}
-</li>
+    <tr class="rows">
+        <td>
+            {{ db_priv.server_id }}
+        </td>
+        <td>
+            {{ db_priv.id }}
+        </td>
+        <td style="text-align:right; font-size: small">
+            {{ db_priv.s }}
+        </td>
+        <td>
+            {{ db_priv.pull_counter }}
+        </td>
+    </tr>
 {% endfor %}
+</table>
+</div>
 {% endblock %}

@@ -55,25 +55,29 @@ def edit(server_id):
     return render_template("server/edit.html", server=server)
 
 
-@server.route("/delete/<int:server_id>", methods=["GET"])
+@server.route("/delete/<int:server_id>", methods=["GET", "POST"])
 def delete(server_id):
 
-    with db.session.no_autoflush:
-        server = Server.query.get_or_404(server_id)
-        db.session.delete(server)
-        users = User.query.filter(User.server_id == server_id).delete()
-        db_privs = DatabasePrivileges.query.filter(
-            DatabasePrivileges.server_id == server_id
-        ).delete()
-        table_privs = TablePrivileges.query.filter(
-            TablePrivileges.server_id == server_id
-        ).delete()
-        current_app.logger.debug(
-            f"Deleted server {server_id} with {users} user, {db_privs} database privileges and {table_privs} table privileges."
-        )
-        db.session.commit()
+    if request.method == "GET":
+        return render_template("server/delete.html", server_id=server_id)
 
-    return redirect(url_for("server.list"))
+    elif request.method == "POST":
+        with db.session.no_autoflush:
+            server = Server.query.get_or_404(server_id)
+            db.session.delete(server)
+            users = User.query.filter(User.server_id == server_id).delete()
+            db_privs = DatabasePrivileges.query.filter(
+                DatabasePrivileges.server_id == server_id
+            ).delete()
+            table_privs = TablePrivileges.query.filter(
+                TablePrivileges.server_id == server_id
+            ).delete()
+            current_app.logger.debug(
+                f"Deleted server {server_id} with {users} user, {db_privs} database privileges and {table_privs} table privileges."
+            )
+            db.session.commit()
+
+        return redirect(url_for("server.list"))
 
 
 @server.route("/test/<int:server_id>", methods=["GET"])
