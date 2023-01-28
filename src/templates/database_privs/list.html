@@ -1,5 +1,10 @@
+{% from "filter.html" import build_filter %}
+
 {% extends "base.html" %}
 {% block content %}
+
+{{ build_filter(url_for('database_privs.list'), servers, server_id, users, username, databases, database_name) }}
+
 <div class="container">
 <table class="lists">
     <tr class="headerRows">
@@ -16,7 +21,7 @@
             Pull-Counter
         </th>
     </tr>
-{% for db_priv in db_privs %}
+{% for db_priv in database_privs %}
     <tr class="rows">
         <td>
             {{ db_priv.server_id }}

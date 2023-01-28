@@ -6,6 +6,7 @@ from views.default import default
 from views.server import server
 from views.config import config
 from views.table_privs import table_privs
+from views.db_privs import database_privs
 
 
 def create_app():
@@ -24,5 +25,6 @@ def create_app():
     app.register_blueprint(server)
     app.register_blueprint(config)
     app.register_blueprint(table_privs)
+    app.register_blueprint(database_privs)
 
     return app
