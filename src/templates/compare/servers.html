@@ -45,7 +45,7 @@
             <td>{% if e.user1 %}{{ e.user1.User }}@{{ e.user1.Host }}{% else %}--{% endif %}</td>
             <td>{% if e.user2 %}{{ e.user2.User }}@{{ e.user2.Host }}{% else %}--{% endif %}</td>
             <td style="text-align: left">
-            {% for diff in e.diffs%}
+            {% for diff in e.diffs %}
                 <div class="diff">
                     <div class="diffTitle">
                         {{ diff[0] }}
@@ -57,7 +57,7 @@
                     </div>
                 </div>
             {% endfor %}
-            {% if not e.diffs %}
+            {% if not e.diffs and e.user1 and e.user2 %}
             no diffs
             {% endif %}
             </td>
@@ -73,6 +73,29 @@
             <th>Server 2</th>
             <th>Diff</th>
         </tr>
+        {% for e in database_compare %}
+        <tr class="rows border_bottom">
+            <td>{% if e.database1 %}{{ e.database1.User }}@{{ e.database1.Host }}/{{e.database1.Db}}{% else %}--{% endif %}</td>
+            <td>{% if e.database2 %}{{ e.database2.User }}@{{ e.database2.Host }}/{{e.database2.Db}}{% else %}--{% endif %}</td>
+            <td style="text-align: left">
+            {% for diff in e.diffs%}
+                <div class="diff">
+                    <div class="diffTitle">
+                        {{ diff[0] }}
+                    </div> 
+                    <div class="diffContent">
+                        {{ diff[1]|truncate(20) }} <br />
+                        unequal<br />
+                        {{ diff[2]|truncate(20) }}
+                    </div>
+                </div>
+            {% endfor %}
+            {% if not e.diffs and e.database1 and e.database2 %}
+            no diffs
+            {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
     </table>
 </div>
 <div class="container">
