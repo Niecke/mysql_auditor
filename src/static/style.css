@@ -185,3 +185,15 @@ input {
 .diffContent {
     font-size: small;
 }
+
+.indexBlock {
+    margin: 1rem;
+    padding: 1rem;
+    border: 2px solid #34495E;
+    border-radius: 8px;
+}
+
+.indexBlockTitle {
+    padding: 0.5rem;
+    text-decoration-line: underline;
+}

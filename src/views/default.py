@@ -7,14 +7,14 @@ default = Blueprint("default", __name__, url_prefix="/")
 
 @default.route("/")
 def index():
-    server_cnt = Server.query.count()
-    user_cnt = User.query.count()
+    servers = Server.query.all()
+    users = User.query.all()
     db_priv_cnt = DatabasePrivileges.query.count()
     table_priv_cnt = TablePrivileges.query.count()
     return render_template(
         "default/index.html",
-        server_cnt=server_cnt,
-        user_cnt=user_cnt,
+        servers=servers,
+        users=users,
         db_priv_cnt=db_priv_cnt,
         table_priv_cnt=table_priv_cnt,
     )
